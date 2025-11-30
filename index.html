@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClockX | Timer | Stopwatch | Timezones</title>
+    <meta name="description" content="ClockX - All-in-one time management tool with clock, timer, stopwatch, and timezone converter. Free, responsive, and feature-rich.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏰</text></svg>">
+    <style>
+        :root {
+            --primary-color: #6b8cbc;
+            --secondary-color: #4a6fa5;
+            --background-color: #1a1a1a;
+            --card-color: #2d2d2d;
+            --text-color: #f0f0f0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+
+        .light-theme {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --background-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--secondary-color);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-color);
+            transition: var(--transition);
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background-color: var(--card-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .clock-display {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-display {
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            min-width: 100px;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .time-input {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .time-input div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .time-input label {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .time-input input {
+            width: 80px;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: var(--card-color);
+            color: var(--text-color);
+        }
+
+        .timezone-selector {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: var(--card-color);
+            color: var(--text-color);
+        }
+
+        .timezones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .timezone-card {
+            background-color: var(--card-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .timezone-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .timezone-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .timezone-time {
+            font-size: 18px;
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .timezone-date {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .ad-container {
+            margin: 30px 0;
+            text-align: center;
+            min-height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #444;
+        }
+
+        .light-theme .ad-container {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+
+        .ad-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            border-top: 1px solid var(--secondary-color);
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .lap-times {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .lap-time {
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            font-family: 'Courier New', monospace;
+        }
+
+        .lap-time:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .clock-display {
+                font-size: 36px;
+            }
+            
+            .time-input {
+                flex-wrap: wrap;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+            
+            .timezones-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .clock-display {
+                font-size: 28px;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                min-width: 80px;
+            }
+            
+            .time-input input {
+                width: 60px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">⏰</span>
+                <span>ClockX</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌞</button>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab active" data-tab="clock">Clock</button>
+            <button class="tab" data-tab="stopwatch">Stopwatch</button>
+            <button class="tab" data-tab="timer">Timer</button>
+            <button class="tab" data-tab="timezones">World Time</button>
+        </div>
+
+        <!-- Ad Space -->
+        <div class="ad-container">
+            <div>
+                <div class="ad-label">Advertisement</div>
+                <!-- AdSense or other ad code would go here -->
+                <div>Ad Space - 728x90</div>
+            </div>
+        </div>
+
+        <!-- Clock Tab -->
+        <div class="tab-content active" id="clock">
+            <h2 class="section-title">Digital Clock</h2>
+            <div class="clock-display" id="clockDisplay">00:00:00 AM</div>
+            <div class="date-display" id="dateDisplay">Loading...</div>
+            
+            <div class="timezone-selector-container">
+                <label for="timezoneSelect">Select Timezone:</label>
+                <select class="timezone-selector" id="timezoneSelect">
+                    <option value="local">Local Time</option>
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">New York</option>
+                    <option value="Europe/London">London</option>
+                    <option value="Asia/Kolkata">India</option>
+                    <option value="Asia/Dhaka">Bangladesh</option>
+                    <option value="Asia/Karachi">Pakistan</option>
+                    <option value="Asia/Colombo">Sri Lanka</option>
+                    <option value="Asia/Kathmandu">Nepal</option>
+                    <option value="Asia/Thimphu">Bhutan</option>
+                    <option value="Asia/Tokyo">Tokyo</option>
+                    <option value="Australia/Sydney">Sydney</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Stopwatch Tab -->
+        <div class="tab-content" id="stopwatch">
+            <h2 class="section-title">Stopwatch</h2>
+            <div class="clock-display" id="stopwatchDisplay">00:00:00.00</div>
+            <div class="controls">
+                <button class="btn" id="startStopwatch">Start</button>
+                <button class="btn" id="pauseStopwatch" disabled>Pause</button>
+                <button class="btn" id="resetStopwatch">Reset</button>
+                <button class="btn" id="lapStopwatch" disabled>Lap</button>
+            </div>
+            <div class="lap-times" id="lapTimes"></div>
+        </div>
+
+        <!-- Timer Tab -->
+        <div class="tab-content" id="timer">
+            <h2 class="section-title">Timer</h2>
+            <div class="clock-display" id="timerDisplay">00:00:00</div>
+            <div class="time-input">
+                <div>
+                    <label>Hours</label>
+                    <input type="number" id="timerHours" min="0" max="23" value="0">
+                </div>
+                <div>
+                    <label>Minutes</label>
+                    <input type="number" id="timerMinutes" min="0" max="59" value="0">
+                </div>
+                <div>
+                    <label>Seconds</label>
+                    <input type="number" id="timerSeconds" min="0" max="59" value="0">
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn" id="startTimer">Start</button>
+                <button class="btn" id="pauseTimer" disabled>Pause</button>
+                <button class="btn" id="resetTimer">Reset</button>
+            </div>
+        </div>
+
+        <!-- Timezones Tab -->
+        <div class="tab-content" id="timezones">
+            <h2 class="section-title">World Time</h2>
+            <div class="timezones-grid" id="timezonesGrid">
+                <!-- Timezone cards will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Ad Space -->
+        <div class="ad-container">
+            <div>
+                <div class="ad-label">Advertisement</div>
+                <!-- AdSense or other ad code would go here -->
+                <div>Ad Space - 728x90</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>ClockX &copy; 2023 - All-in-One Time Management Tool</p>
+            <p>Built with AI assistance - because why code when you can create?</p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme Toggle - Dark theme is default
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            themeToggle.textContent = document.body.classList.contains('light-theme') ? '🌓' : '🌞';
+            // Save theme preference
+            localStorage.setItem('clockx-theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        });
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('clockx-theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.textContent = '🌓';
+        }
+
+        // Tab Navigation
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show target tab content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === targetTab) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Clock Functionality with 12-hour format
+        const clockDisplay = document.getElementById('clockDisplay');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const timezoneSelect = document.getElementById('timezoneSelect');
+
+        function updateClock() {
+            const now = new Date();
+            let timezone = timezoneSelect.value;
+            
+            let displayTime;
+            if (timezone === 'local') {
+                displayTime = now;
+            } else {
+                const options = { timeZone: timezone, hour12: true };
+                const timeString = now.toLocaleTimeString('en-US', options);
+                displayTime = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
+            }
+            
+            // Format time in 12-hour format with AM/PM
+            let hours = displayTime.getHours();
+            const minutes = String(displayTime.getMinutes()).padStart(2, '0');
+            const seconds = String(displayTime.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            
+            clockDisplay.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+            
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateDisplay.textContent = displayTime.toLocaleDateString(undefined, dateOptions);
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Stopwatch Functionality
+        const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+        const startStopwatchBtn = document.getElementById('startStopwatch');
+        const pauseStopwatchBtn = document.getElementById('pauseStopwatch');
+        const resetStopwatchBtn = document.getElementById('resetStopwatch');
+        const lapStopwatchBtn = document.getElementById('lapStopwatch');
+        const lapTimesContainer = document.getElementById('lapTimes');
+
+        let stopwatchInterval;
+        let stopwatchRunning = false;
+        let stopwatchStartTime;
+        let stopwatchElapsedTime = 0;
+        let lapCount = 1;
+
+        function formatStopwatchTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            const centiseconds = Math.floor((ms % 1000) / 10);
+            
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
+        }
+
+        function updateStopwatch() {
+            const currentTime = Date.now();
+            const elapsed = currentTime - stopwatchStartTime + stopwatchElapsedTime;
+            stopwatchDisplay.textContent = formatStopwatchTime(elapsed);
+        }
+
+        startStopwatchBtn.addEventListener('click', () => {
+            if (!stopwatchRunning) {
+                stopwatchRunning = true;
+                stopwatchStartTime = Date.now();
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+                
+                startStopwatchBtn.disabled = true;
+                pauseStopwatchBtn.disabled = false;
+                lapStopwatchBtn.disabled = false;
+            }
+        });
+
+        pauseStopwatchBtn.addEventListener('click', () => {
+            if (stopwatchRunning) {
+                stopwatchRunning = false;
+                clearInterval(stopwatchInterval);
+                stopwatchElapsedTime += Date.now() - stopwatchStartTime;
+                
+                startStopwatchBtn.disabled = false;
+                pauseStopwatchBtn.disabled = true;
+            }
+        });
+
+        resetStopwatchBtn.addEventListener('click', () => {
+            stopwatchRunning = false;
+            clearInterval(stopwatchInterval);
+            stopwatchElapsedTime = 0;
+            stopwatchDisplay.textContent = '00:00:00.00';
+            lapCount = 1;
+            lapTimesContainer.innerHTML = '';
+            
+            startStopwatchBtn.disabled = false;
+            pauseStopwatchBtn.disabled = true;
+            lapStopwatchBtn.disabled = true;
+        });
+
+        lapStopwatchBtn.addEventListener('click', () => {
+            if (stopwatchRunning) {
+                const currentTime = Date.now();
+                const elapsed = currentTime - stopwatchStartTime + stopwatchElapsedTime;
+                
+                const lapTime = document.createElement('div');
+                lapTime.className = 'lap-time';
+                lapTime.textContent = `Lap ${lapCount}: ${formatStopwatchTime(elapsed)}`;
+                lapTimesContainer.prepend(lapTime);
+                lapCount++;
+            }
+        });
+
+        // Timer Functionality
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerHours = document.getElementById('timerHours');
+        const timerMinutes = document.getElementById('timerMinutes');
+        const timerSeconds = document.getElementById('timerSeconds');
+        const startTimerBtn = document.getElementById('startTimer');
+        const pauseTimerBtn = document.getElementById('pauseTimer');
+        const resetTimerBtn = document.getElementById('resetTimer');
+
+        let timerInterval;
+        let timerRunning = false;
+        let timerRemainingTime = 0;
+
+        function formatTimerTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.textContent = formatTimerTime(timerRemainingTime);
+        }
+
+        function startTimer() {
+            if (!timerRunning && timerRemainingTime > 0) {
+                timerRunning = true;
+                timerInterval = setInterval(() => {
+                    timerRemainingTime -= 1000;
+                    updateTimerDisplay();
+                    
+                    if (timerRemainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        timerRunning = false;
+                        timerDisplay.textContent = "00:00:00";
+                        // Play a sound when timer finishes
+                        try {
+                        alert("Timer finished!");
+                        } catch(e) {
+                            // Fallback to alert if audio fails
+                            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
+                            audio.play();
+                            
+                        }
+                        startTimerBtn.disabled = false;
+                        pauseTimerBtn.disabled = true;
+                    }
+                }, 1000);
+                
+                startTimerBtn.disabled = true;
+                pauseTimerBtn.disabled = false;
+            }
+        }
+
+        startTimerBtn.addEventListener('click', () => {
+            if (!timerRunning) {
+                const hours = parseInt(timerHours.value) || 0;
+                const minutes = parseInt(timerMinutes.value) || 0;
+                const seconds = parseInt(timerSeconds.value) || 0;
+                
+                timerRemainingTime = (hours * 3600 + minutes * 60 + seconds) * 1000;
+                
+                if (timerRemainingTime > 0) {
+                    startTimer();
+                } else {
+                    alert("Please set a timer value greater than 0");
+                }
+            }
+        });
+
+        pauseTimerBtn.addEventListener('click', () => {
+            if (timerRunning) {
+                timerRunning = false;
+                clearInterval(timerInterval);
+                
+                startTimerBtn.disabled = false;
+                pauseTimerBtn.disabled = true;
+            }
+        });
+
+        resetTimerBtn.addEventListener('click', () => {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            timerRemainingTime = 0;
+            updateTimerDisplay();
+            
+            startTimerBtn.disabled = false;
+            pauseTimerBtn.disabled = true;
+        });
+
+        // Timezones Functionality with 12-hour format and South Asian countries
+        const timezonesGrid = document.getElementById('timezonesGrid');
+        const timezones = [
+            { name: "New York", zone: "America/New_York" },
+            { name: "London", zone: "Europe/London" },
+            { name: "India", zone: "Asia/Kolkata" },
+            { name: "Bangladesh", zone: "Asia/Dhaka" },
+            { name: "Pakistan", zone: "Asia/Karachi" },
+            { name: "Sri Lanka", zone: "Asia/Colombo" },
+            { name: "Nepal", zone: "Asia/Kathmandu" },
+            { name: "Bhutan", zone: "Asia/Thimphu" },
+            { name: "Tokyo", zone: "Asia/Tokyo" },
+            { name: "Sydney", zone: "Australia/Sydney" },
+            { name: "Dubai", zone: "Asia/Dubai" },
+            { name: "Singapore", zone: "Asia/Singapore" }
+        ];
+
+        function updateTimezones() {
+            timezonesGrid.innerHTML = '';
+            
+            timezones.forEach(tz => {
+                const now = new Date();
+                const options = { 
+                    timeZone: tz.zone, 
+                    hour12: true, 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                };
+                
+                const timeString = now.toLocaleTimeString('en-US', options);
+                const dateString = now.toLocaleDateString('en-US', { 
+                    timeZone: tz.zone, 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                const card = document.createElement('div');
+                card.className = 'timezone-card';
+                card.innerHTML = `
+                    <div class="timezone-name">${tz.name}</div>
+                    <div class="timezone-time">${timeString}</div>
+                    <div class="timezone-date">${dateString}</div>
+                `;
+                
+                timezonesGrid.appendChild(card);
+            });
+        }
+
+        setInterval(updateTimezones, 1000);
+        updateTimezones();
+
+        // Initialize all displays
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
